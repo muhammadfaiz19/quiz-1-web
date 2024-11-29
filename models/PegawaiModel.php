@@ -1,37 +1,75 @@
 <?php
-include_once('../models/PasienModel.php');
 
-class PasienController
+include_once('../db/database.php');
+
+class PegawaiModel
 {
-    private $model;
+    private $db;
 
     public function __construct()
     {
-        $this->model = new PasienModel();
+        $this->db = new Database();
     }
 
-    public function addPasien($no_reg, $no_ktp, $nama_pasien, $jk, $diagnosis)
+    public function addPegawai($nomor_induk, $nama_lengkap, $jk, $bagian, $status_kawin, $tmt)
     {
-        return $this->model->addPasien($no_reg, $no_ktp, $nama_pasien, $jk, $diagnosis);
+        $sql = "INSERT INTO pegawai (nomor_induk, nama_lengkap, jk, bagian, status_kawin, tmt) VALUES (:nomor_induk, :nama_lengkap, :jk, :bagian, :status_kawin, :tmt)";
+        $params = array(
+            ":nomor_induk" => $nomor_induk,
+            ":nama_lengkap" => $nama_lengkap,
+            ":jk" => $jk,
+            ":bagian" => $bagian,
+            ":status_kawin" => $status_kawin,
+            ":tmt" => $tmt
+        );
+
+        $result = $this->db->executeQuery($sql, $params);
+        return json_encode($this->response($result, "Insert successful", "Insert failed"));
     }
 
-    public function getPasien($id)
+    public function getPegawai($id)
     {
-        return $this->model->getPasien($id);
+        $sql = "SELECT * FROM pegawai WHERE id = :id";
+        $params = array(":id" => $id);
+        return $this->db->executeQuery($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updatePasien($id, $no_reg, $no_ktp, $nama_pasien, $jk, $diagnosis)
+    public function updatePegawai($id, $nomor_induk, $nama_lengkap, $jk, $bagian, $status_kawin, $tmt)
     {
-        return $this->model-> updatePasien($id, $no_reg, $no_ktp, $nama_pasien, $jk, $diagnosis);
+        $sql = "UPDATE pegawai SET nomor_induk = :nomor_induk, nama_lengkap = :nama_lengkap, jk = :jk, bagian = :bagian, status_kawin = :status_kawin, tmt = :tmt WHERE id = :id";
+        $params = array(
+            ":nomor_induk" => $nomor_induk,
+            ":nama_lengkap" => $nama_lengkap,
+            ":jk" => $jk,
+            ":bagian" => $bagian,
+            ":status_kawin" => $status_kawin,
+            ":tmt" => $tmt,
+            ":id" => $id
+        );
+
+        $result = $this->db->executeQuery($sql, $params);
+        return json_encode($this->response($result, "Update successful", "Update failed"));
     }
 
-    public function deletePasien($id)
+    public function deletePegawai($id)
     {
-        return $this->model->deletePasien($id);
+        $sql = "DELETE FROM pegawai WHERE id = :id";
+        $params = array(":id" => $id);
+        $result = $this->db->executeQuery($sql, $params);
+        return json_encode($this->response($result, "Delete successful", "Delete failed"));
     }
 
-    public function getPasienList()
+    public function getPegawaiList()
     {
-        return $this->model->getPasienList();
+        $sql = 'SELECT * FROM pegawai LIMIT 100';
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function response($result, $successMsg, $failMsg)
+    {
+        return array(
+            "success" => $result,
+            "message" => $result ? $successMsg : $failMsg
+        );
     }
 }
